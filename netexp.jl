@@ -224,7 +224,7 @@ end
 ########################################
 #seedkey = "Enceladus_test"
 
-SEEDJSON = "rseeds.dat"
+SEEDJSON = "seeds.dat"
 #TARGETJSON = "links/Freilich09.json"
 
 # # fsplit = split(DATADIR,"/")
