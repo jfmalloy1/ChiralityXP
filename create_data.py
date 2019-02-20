@@ -13,4 +13,10 @@ with open("kegg_chirality.csv") as kegg:
             c = row[0][:-4]
             output.write(c+ " "),
 
+        #If compound is not chiral
+        # if (int(row[6]) == 0):
+        #     c = row[0][:-4]
+        #     output.write(c+ " "),
+
+
 output.close()
