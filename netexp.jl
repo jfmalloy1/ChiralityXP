@@ -256,7 +256,7 @@ foreach(readdir("seeds")) do f:
 
                 (X,Y) = netexp(R, P, RT, PT, b, bp, x)
                 println("Writing out netexp"*string(count)*"...")
-                simple_write_out("results/simple/chiral"*string(count)*".json",x,compounds,reactions,X,Y)
+                simple_write_out("results/simple/"*f*""*string(count)*".json",x,compounds,reactions,X,Y)
                 count = count + 1
         end
     end
