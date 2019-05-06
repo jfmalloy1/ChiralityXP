@@ -12,7 +12,6 @@ function prepare_matrices_and_targets(reaction_edges_json::String)
 
     ## could use ["substrates""] too
     reactions = [i for i in keys(reaction_edges["products"])]
-
     cpd_reactants_flat = unique(Iterators.flatten(values(reaction_edges["substrates"])))
     cpd_products_flat = unique(Iterators.flatten(values(reaction_edges["products"])))
     compounds = unique(Iterators.flatten([cpd_reactants_flat,cpd_products_flat]))
@@ -25,7 +24,10 @@ function prepare_matrices_and_targets(reaction_edges_json::String)
     R = zeros(Int, (length(compounds),length(reactions)))
     P = zeros(Int, (length(compounds),length(reactions)))
 
+    count = 0
     for (i,r) in enumerate(reactions)
+        count = count+1
+        print(count)
         R[:,i] = [Int(cpd in reaction_edges["substrates"][r]) for cpd in compounds]
         P[:,i] = [Int(cpd in reaction_edges["products"][r]) for cpd in compounds]
     end
@@ -225,39 +227,42 @@ end
 #seedkey = "Enceladus_test"
 
 #READ IN A NUMBER OF FILES AT A TIME
-foreach(readdir("seeds")) do f:
-    SEEDJSON = f
+
+OUTDIR = "results/simple/"
+
+if ispath(OUTDIR)==false
+    mkpath(OUTDIR)
+end
+
+#reaction edges
+reaction_edges_json = "links/reaction_edges.json"
+
+(R,P,compounds,reactions) = prepare_matrices_and_targets(reaction_edges_json)
+#necessary for network expansion
+RT = transpose(R)
+PT = transpose(P)
+b = vec(sum(RT, dims=2))
+bp = vec(sum(PT, dims=2))
+
+foreach(readdir("seeds")) do f
+    SEEDJSON = "seeds/"*f
     #TARGETJSON = "links/Freilich09.json"
 
     # # fsplit = split(DATADIR,"/")
     # # OUTDIR = "results/simple/"*fsplit[end-2]*"/"*fsplit[end-1]*"/"
-    OUTDIR = "results/simple/"
-
-    if ispath(OUTDIR)==false
-        mkpath(OUTDIR)
-    end
-
-    #reaction edges
-    reaction_edges_json = "links/reaction_edges.json"
 
     open(SEEDJSON) do file
         count = 0
         for ln in eachline(file)
-                ## DO MAIN
-                #UPDATE 2/20: removed t from list of variables that receive output & commented out TARGETJSON
-                (R,P,compounds,reactions) = prepare_matrices_and_targets(reaction_edges_json) #,TARGETJSON)
-                x = prepare_seeds(String.(reduce(vcat,split.(ln))),compounds)
+            ## DO MAIN
+            #UPDATE 2/20: removed t from list of variables that receive output & commented out TARGETJSON
+             #,TARGETJSON)
+            x = prepare_seeds(String.(reduce(vcat,split.(ln))),compounds)
 
-                #necessary for network expansion
-                RT = transpose(R)
-                PT = transpose(P)
-                b = vec(sum(RT, dims=2))
-                bp = vec(sum(PT, dims=2))
-
-                (X,Y) = netexp(R, P, RT, PT, b, bp, x)
-                println("Writing out netexp"*string(count)*"...")
-                simple_write_out("results/simple/"*f*""*string(count)*".json",x,compounds,reactions,X,Y)
-                count = count + 1
+            (X,Y) = netexp(R, P, RT, PT, b, bp, x)
+            println("Writing out netexp "*f*""string(count)*"...")
+            simple_write_out("results/simple/"*f*""*string(count)*".json",x,compounds,reactions,X,Y)
+            count = count + 1
         end
     end
 end
