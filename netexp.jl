@@ -224,38 +224,41 @@ end
 ########################################
 #seedkey = "Enceladus_test"
 
-SEEDJSON = "seeds.dat"
-#TARGETJSON = "links/Freilich09.json"
+#READ IN A NUMBER OF FILES AT A TIME
+foreach(readdir("seeds")) do f:
+    SEEDJSON = f
+    #TARGETJSON = "links/Freilich09.json"
 
-# # fsplit = split(DATADIR,"/")
-# # OUTDIR = "results/simple/"*fsplit[end-2]*"/"*fsplit[end-1]*"/"
-OUTDIR = "results/simple/"
+    # # fsplit = split(DATADIR,"/")
+    # # OUTDIR = "results/simple/"*fsplit[end-2]*"/"*fsplit[end-1]*"/"
+    OUTDIR = "results/simple/"
 
-if ispath(OUTDIR)==false
-    mkpath(OUTDIR)
-end
+    if ispath(OUTDIR)==false
+        mkpath(OUTDIR)
+    end
 
-#reaction edges
-reaction_edges_json = "links/reaction_edges.json"
+    #reaction edges
+    reaction_edges_json = "links/reaction_edges.json"
 
-open(SEEDJSON) do file
-    count = 0
-    for ln in eachline(file)
-            ## DO MAIN
-            #UPDATE 2/20: removed t from list of variables that receive output & commented out TARGETJSON
-            (R,P,compounds,reactions) = prepare_matrices_and_targets(reaction_edges_json) #,TARGETJSON)
-            x = prepare_seeds(String.(reduce(vcat,split.(ln))),compounds)
+    open(SEEDJSON) do file
+        count = 0
+        for ln in eachline(file)
+                ## DO MAIN
+                #UPDATE 2/20: removed t from list of variables that receive output & commented out TARGETJSON
+                (R,P,compounds,reactions) = prepare_matrices_and_targets(reaction_edges_json) #,TARGETJSON)
+                x = prepare_seeds(String.(reduce(vcat,split.(ln))),compounds)
 
-            #necessary for network expansion
-            RT = transpose(R)
-            PT = transpose(P)
-            b = vec(sum(RT, dims=2))
-            bp = vec(sum(PT, dims=2))
+                #necessary for network expansion
+                RT = transpose(R)
+                PT = transpose(P)
+                b = vec(sum(RT, dims=2))
+                bp = vec(sum(PT, dims=2))
 
-            (X,Y) = netexp(R, P, RT, PT, b, bp, x)
-            println("Writing out netexp"*string(count)*"...")
-            simple_write_out("results/simple/chiral"*string(count)*".json",x,compounds,reactions,X,Y)
-            count = count + 1
+                (X,Y) = netexp(R, P, RT, PT, b, bp, x)
+                println("Writing out netexp"*string(count)*"...")
+                simple_write_out("results/simple/chiral"*string(count)*".json",x,compounds,reactions,X,Y)
+                count = count + 1
+        end
     end
 end
 
