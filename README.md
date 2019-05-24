@@ -37,3 +37,6 @@ Downloads molecular files from KEGG for specified compounds (given by updated_co
 
 *network_size.py*
 Outputs the number of compounds present in a network, represented within the "links/reaction_edges.json" file.
+
+*collect_exp_data.py*
+Collects the total number of compounds (minus original seed set) that consist of the network post-network expansion. Needs json files in results/formatted folder.
